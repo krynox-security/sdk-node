@@ -34,7 +34,7 @@ export interface KrynoxOptions {
   timeoutMs?: number;
 }
 
-const DEFAULT_ENDPOINT = 'https://captcha.krynox.id/siteverify';
+const DEFAULT_ENDPOINT = 'https://api.krynox.id/siteverify';
 
 export class KrynoxCaptcha {
   private readonly endpoint: string;

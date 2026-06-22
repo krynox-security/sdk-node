@@ -19,7 +19,7 @@
   "keywords": ["krynox", "captcha", "bot", "verification", "proof-of-work"],
   "license": "MIT",
   "homepage": "https://krynox.id",
-  "repository": { "type": "git", "url": "git+https://gitlab.com/krynox/captcha/sdk-node.git" },
+  "repository": { "type": "git", "url": "git+https://github.com/krynox-security/sdk-node.git" },
   "devDependencies": {
     "typescript": "^5.9.0"
   },
