@@ -12,16 +12,32 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
-  "keywords": ["krynox", "captcha", "bot", "verification", "proof-of-work"],
+  "keywords": [
+    "krynox",
+    "captcha",
+    "bot",
+    "verification",
+    "proof-of-work"
+  ],
   "license": "MIT",
   "homepage": "https://krynox.net",
-  "repository": { "type": "git", "url": "git+https://github.com/krynox-security/sdk-node.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krynox-security/sdk-node.git"
+  },
   "devDependencies": {
     "typescript": "^5.9.0"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
