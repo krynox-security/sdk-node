@@ -1,6 +1,6 @@
 {
   "name": "@krynox/captcha",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Official Node/TypeScript server-side verification SDK for Krynox Captcha.",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,7 +18,7 @@
   },
   "keywords": ["krynox", "captcha", "bot", "verification", "proof-of-work"],
   "license": "MIT",
-  "homepage": "https://krynox.id",
+  "homepage": "https://krynox.net",
   "repository": { "type": "git", "url": "git+https://github.com/krynox-security/sdk-node.git" },
   "devDependencies": {
     "typescript": "^5.9.0"
