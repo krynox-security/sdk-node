@@ -33,8 +33,12 @@ export interface KrynoxResult {
   risk?: RiskLevel;
   /** Site name / primary domain the key belongs to. */
   hostname?: string;
-  /** ISO timestamp the challenge was verified. */
+  /** ISO timestamp the challenge was issued. */
   challengeTs?: string;
+  /** Form action signed into the issued challenge, when supplied. */
+  action?: string;
+  /** Customer data signed into the issued challenge, when supplied. */
+  cdata?: string;
   /** Machine-readable failure reasons (see {@link KrynoxErrorCode}). */
   errorCodes?: string[];
   /** Stable reason codes explaining the score — empty on a clean verification. */
@@ -49,7 +53,7 @@ export interface KrynoxResult {
 export interface KrynoxClassification {
   ok: boolean;
   score?: number;
-  classification?: 'GOOD' | 'SUSPECT' | 'BAD' | string;
+  classification?: 'GOOD' | 'NEUTRAL' | 'BAD' | string;
   reasons?: string[];
   blocked?: boolean;
   errorCodes?: string[];
@@ -103,6 +107,8 @@ function parseResult(data: Record<string, unknown>): KrynoxResult {
     risk: data.risk as RiskLevel | undefined,
     hostname: typeof data.hostname === 'string' ? data.hostname : undefined,
     challengeTs: typeof data.challenge_ts === 'string' ? data.challenge_ts : undefined,
+    action: typeof data.action === 'string' ? data.action : undefined,
+    cdata: typeof data.cdata === 'string' ? data.cdata : undefined,
     errorCodes: Array.isArray(data['error-codes']) ? (data['error-codes'] as string[]) : undefined,
     reasons: Array.isArray(data.reasons) ? (data.reasons as string[]) : undefined,
     agent:

@@ -73,7 +73,7 @@ await krynox.feedback('bot', { ip: suspiciousIp });
 - `verify(secret, response, options?)` — functional shorthand
 - `KrynoxErrorCode` — typed constants for `errorCodes` (compare, don't stringly-type)
 
-`KrynoxResult`: `{ success, score?, risk?, hostname?, challengeTs?, errorCodes?, reasons?, agent?, human? }`
+`KrynoxResult`: `{ success, score?, risk?, hostname?, challengeTs?, action?, cdata?, errorCodes?, reasons?, agent?, human? }`
 `KrynoxClassification`: `{ ok, score?, classification?, reasons?, blocked?, errorCodes? }`
 
 Self-hosting? Pass `{ endpoint: 'https://captcha.your-domain/siteverify' }` — `feedback`/`classify`
