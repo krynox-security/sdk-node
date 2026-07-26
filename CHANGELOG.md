@@ -25,7 +25,16 @@ First release.
 - Automatic retries on transient failures (network, `429`, `5xx`), each carrying
   a per-verify idempotency key so a retried single-use token replays the first
   outcome instead of failing.
-- Configurable API host for self-hosted deployments.
+- Configurable API host for self-hosted deployments. `classify`/`feedback` are derived from
+  the verify endpoint by one rule shared with the other six SDKs: an `/siteverify` suffix
+  (trailing slash ignored) is replaced, and any other endpoint is treated as a base URL the
+  path is appended to.
+- A `user-agent` header on every request (`verify`, `classify`, `feedback`), formatted
+  `krynox-captcha-node/<version>` and built from the exported `VERSION` constant so it can
+  never drift from `package.json` — without it, server-side attribution of SDK and version
+  is impossible.
+- `errorCodes` and `reasons` on `KrynoxResult` are always arrays (empty when the API omits
+  them), matching the other six SDKs — no optional chaining needed to read them.
 - Ships ESM and TypeScript types (ESM-only package).
 
 ### Notes

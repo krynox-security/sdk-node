@@ -17,7 +17,7 @@ if (!result.success) {
   return res.status(400).json({ error: 'Captcha verification failed', codes: result.errorCodes });
 }
 // optional: privacy-preserving risk hint + explainable reason codes
-if (result.risk === 'high' || result.reasons?.includes('tor-exit')) {
+if (result.risk === 'high' || result.reasons.includes('tor-exit')) {
   // add friction (email verification, manual review, …)
 }
 ```
@@ -26,6 +26,8 @@ if (result.risk === 'high' || result.reasons?.includes('tor-exit')) {
 
 - `result.reasons` — stable, machine-readable codes explaining the score
   (e.g. `'tor-exit'`, `'elevated-request-rate'`, `'datacenter-asn'`); empty on a clean verify.
+  `reasons` and `errorCodes` are **always arrays** — never `undefined` — so you can index them
+  without optional chaining.
 - `result.agent` — set when a **verified AI agent** (Web Bot Auth) was forwarded:
   `{ verified, name?, allowlisted? }`. Allowlist good bots instead of blocking them.
 - `result.human` — set when a **device-attested human** (Private Access Token) was forwarded:
@@ -72,9 +74,19 @@ await krynox.feedback('bot', { ip: suspiciousIp });
 - `.feedback(label, { ip?, note? }) → Promise<KrynoxFeedback>` — `label` is `'human' | 'bot'`
 - `verify(secret, response, options?)` — functional shorthand
 - `KrynoxErrorCode` — typed constants for `errorCodes` (compare, don't stringly-type)
+- `VERSION` / `USER_AGENT` — the package version and the `user-agent` sent on every request
 
-`KrynoxResult`: `{ success, score?, risk?, hostname?, challengeTs?, action?, cdata?, errorCodes?, reasons?, agent?, human? }`
+`KrynoxResult`: `{ success, score?, risk?, hostname?, challengeTs?, action?, cdata?, errorCodes, reasons, agent?, human? }`
 `KrynoxClassification`: `{ ok, score?, classification?, reasons?, blocked?, errorCodes? }`
 
-Self-hosting? Pass `{ endpoint: 'https://captcha.your-domain/siteverify' }` — `feedback`/`classify`
-endpoints are derived from it.
+Every request carries `user-agent: krynox-captcha-node/<version>`.
+
+### Self-hosting
+
+Pass `{ endpoint: 'https://captcha.your-domain/siteverify' }` — the `classify`/`feedback` endpoints
+are derived from it with the rule shared by all seven SDKs:
+
+- ends with `/siteverify` (trailing slash ignored) → that suffix is replaced
+  (`https://captcha.your-domain/classify`);
+- anything else is treated as a base URL and the path is appended
+  (`https://captcha.your-domain/api` → `https://captcha.your-domain/api/classify`).

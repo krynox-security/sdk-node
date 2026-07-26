@@ -5,8 +5,14 @@
  *   const krynox = new KrynoxCaptcha(process.env.KRYNOX_SECRET!);
  *   const r = await krynox.verify(token, req.ip);
  *   if (!r.success) return res.status(400).send('captcha failed');
- *   if (r.risk === 'high' || r.reasons?.includes('tor-exit')) { ...friction... }
+ *   if (r.risk === 'high' || r.reasons.includes('tor-exit')) { ...friction... }
  */
+
+/** Package version — kept in lockstep with package.json (asserted by a test). */
+export const VERSION = '0.1.0';
+
+/** Sent as `user-agent` on every request, so the API can attribute traffic to SDK + version. */
+export const USER_AGENT = `krynox-captcha-node/${VERSION}`;
 
 export type RiskLevel = 'low' | 'medium' | 'high';
 
@@ -39,10 +45,10 @@ export interface KrynoxResult {
   action?: string;
   /** Customer data signed into the issued challenge, when supplied. */
   cdata?: string;
-  /** Machine-readable failure reasons (see {@link KrynoxErrorCode}). */
-  errorCodes?: string[];
+  /** Machine-readable failure reasons (see {@link KrynoxErrorCode}) — empty on success. */
+  errorCodes: string[];
   /** Stable reason codes explaining the score — empty on a clean verification. */
-  reasons?: string[];
+  reasons: string[];
   /** Verified AI agent identity, when forwarded. */
   agent?: KrynoxAgent;
   /** Attested-human identity, when forwarded. */
@@ -109,8 +115,8 @@ function parseResult(data: Record<string, unknown>): KrynoxResult {
     challengeTs: typeof data.challenge_ts === 'string' ? data.challenge_ts : undefined,
     action: typeof data.action === 'string' ? data.action : undefined,
     cdata: typeof data.cdata === 'string' ? data.cdata : undefined,
-    errorCodes: Array.isArray(data['error-codes']) ? (data['error-codes'] as string[]) : undefined,
-    reasons: Array.isArray(data.reasons) ? (data.reasons as string[]) : undefined,
+    errorCodes: Array.isArray(data['error-codes']) ? (data['error-codes'] as string[]) : [],
+    reasons: Array.isArray(data.reasons) ? (data.reasons as string[]) : [],
     agent:
       agent && typeof agent === 'object'
         ? { verified: agent.verified === true, name: typeof agent.name === 'string' ? agent.name : undefined, allowlisted: agent.allowlisted === true }
@@ -137,8 +143,14 @@ export class KrynoxCaptcha {
     this.retries = options.retries ?? 2;
   }
 
+  /**
+   * Derive a sibling endpoint (`/classify`, `/feedback`) from the configured verify URL.
+   * A `…/siteverify` suffix (with or without a trailing slash) is replaced; anything else is
+   * treated as a base URL and the path is appended. Identical rule across all seven SDKs.
+   */
   private derive(path: string): string {
-    return this.endpoint.replace(/\/siteverify$/, path);
+    const base = this.endpoint.replace(/\/+$/, '');
+    return base.endsWith('/siteverify') ? base.slice(0, -'/siteverify'.length) + path : base + path;
   }
 
   /** POST JSON with a per-attempt timeout, retrying transient failures (network / 429 / 5xx). */
@@ -150,7 +162,7 @@ export class KrynoxCaptcha {
       try {
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          headers: { 'content-type': 'application/json', 'user-agent': USER_AGENT },
           body: JSON.stringify(body),
           signal: controller.signal,
         });
@@ -173,14 +185,18 @@ export class KrynoxCaptcha {
 
   /** Verify a captcha response token from the widget. */
   async verify(response: string, remoteip?: string, opts: { idempotencyKey?: string } = {}): Promise<KrynoxResult> {
-    if (!response) return { success: false, errorCodes: [KrynoxErrorCode.MissingResponse] };
+    if (!response) return { success: false, errorCodes: [KrynoxErrorCode.MissingResponse], reasons: [] };
     // A token is single-use, so a retried verify must carry an idempotency key — the server then
     // returns the first outcome instead of failing the now-consumed token.
     const idempotency_key = opts.idempotencyKey ?? (this.retries > 0 ? randomKey() : undefined);
     try {
       return parseResult(await this.post(this.endpoint, { secret: this.secret, response, remoteip, idempotency_key }));
     } catch (e) {
-      return { success: false, errorCodes: [isAbort(e) ? KrynoxErrorCode.Timeout : KrynoxErrorCode.RequestFailed] };
+      return {
+        success: false,
+        errorCodes: [isAbort(e) ? KrynoxErrorCode.Timeout : KrynoxErrorCode.RequestFailed],
+        reasons: [],
+      };
     }
   }
 
