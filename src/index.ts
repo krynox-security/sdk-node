@@ -60,9 +60,11 @@ export interface KrynoxClassification {
   ok: boolean;
   score?: number;
   classification?: 'GOOD' | 'NEUTRAL' | 'BAD' | string;
-  reasons?: string[];
+  /** Always an array — empty when the API returns none. */
+  reasons: string[];
   blocked?: boolean;
-  errorCodes?: string[];
+  /** Always an array — empty when the API returns none. */
+  errorCodes: string[];
 }
 
 /** Feedback result from {@link KrynoxCaptcha.feedback}. */
@@ -221,12 +223,12 @@ export class KrynoxCaptcha {
         ok: data.ok === true,
         score: typeof data.score === 'number' ? data.score : undefined,
         classification: typeof data.classification === 'string' ? data.classification : undefined,
-        reasons: Array.isArray(data.reasons) ? (data.reasons as string[]) : undefined,
+        reasons: Array.isArray(data.reasons) ? (data.reasons as string[]) : [],
         blocked: data.blocked === true,
-        errorCodes: Array.isArray(data['error-codes']) ? (data['error-codes'] as string[]) : undefined,
+        errorCodes: Array.isArray(data['error-codes']) ? (data['error-codes'] as string[]) : [],
       };
     } catch (e) {
-      return { ok: false, errorCodes: [isAbort(e) ? KrynoxErrorCode.Timeout : KrynoxErrorCode.RequestFailed] };
+      return { ok: false, reasons: [], errorCodes: [isAbort(e) ? KrynoxErrorCode.Timeout : KrynoxErrorCode.RequestFailed] };
     }
   }
 }

@@ -186,7 +186,7 @@ test('classify() and feedback() hit the derived endpoints', async () => {
     classification: 'NEUTRAL',
     reasons: ['risky-ip'],
     blocked: false,
-    errorCodes: undefined,
+    errorCodes: [],
   });
 
   const fb = await client.feedback('human', { ip: '203.0.113.9' });
