@@ -22,13 +22,11 @@ First release.
   when the site's Agent policy allows it through.
 - `human` on the result — an attested real human, from a device Private Access
   Token or a WebAuthn passkey.
-- `honeypot` verify option — forwards the widget's invisible decoy field so the
-  data plane can flag or reject a submission that filled it in.
 - Automatic retries on transient failures (network, `429`, `5xx`), each carrying
   a per-verify idempotency key so a retried single-use token replays the first
   outcome instead of failing.
 - Configurable API host for self-hosted deployments.
-- Ships ESM, CommonJS and TypeScript types.
+- Ships ESM and TypeScript types (ESM-only package).
 
 ### Notes
 
